@@ -307,8 +307,6 @@ Each API may return different response structures. The adapter converts those di
 
 ### Facade Pattern
 
-![Facade Diagram](screenshots/interactive_map.png)
-
 The facade pattern provides a simpler interface for working with multiple APIs.
 
 Instead of the rest of the application calling every API directly, the facade manages the API calls and returns the required weather data in a cleaner way.
@@ -320,8 +318,6 @@ Instead of the rest of the application calling every API directly, the facade ma
 The top layer diagram shows the general flow of the application and how the main components communicate with each other.
 
 ### Component Diagram
-
-![Component Diagram](architecture/component_diagram.png)
 
 The component diagram shows the relationships between the main parts of the application.
 
