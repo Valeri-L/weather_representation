@@ -1,175 +1,381 @@
-# Weather Application
+# Weather Comparison Application
 
 ![Weather App Logo](screenshots/clouds.jpg)
 
 ## Overview
-This is my small weather web application that has the data from two different API's.
-The primary goal of the Weather Comparison Web Application is to empower users with a seamless and intuitive tool for comparing weather data from two distinct sources. By showcasing temperature, chance of rain, and feels-like temperature, web application data insures you that the data sometimes can be not so accurate.
 
+This is a small weather web application that compares weather data from two different weather APIs.
+
+The application shows weather information such as:
+
+* Temperature
+* Feels-like temperature
+* Chance of rain
+* Hourly forecast
+* Weekly forecast
+
+The main purpose of this project is to show that weather forecasts are not always identical between providers. Even when APIs update frequently, the data can still be different depending on the source, calculation method, and forecast model.
+
+---
 
 ## Table of Contents
 
-- [Usage](#usage)
-- [Installation](#installation)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Architecture](#architecture)
-- [License](#license)
+* [Purpose](#purpose)
+* [Features](#features)
+* [Tech Stack](#tech-stack)
+* [Installation](#installation)
+* [Environment Variables](#environment-variables)
+* [Running the Application](#running-the-application)
+* [Usage](#usage)
+* [Screenshots](#screenshots)
+* [Architecture](#architecture)
+* [Project Structure](#project-structure)
+* [License](#license)
 
+---
 
-## Usage
-#### Clients
-- simple weather application that shows data of two different weather apis and the client can see the differences.
+## Purpose
 
-#### Developers
-- code structure that easy to understand.
-- easy to refactor or integrate new api.
-- can be integrated with different weather API's just by creating a interface api class in the api_folder.py and then instantiate the api interface in the api adapter and api_facade.
+The Weather Comparison Application was created to help users understand that weather forecast data can vary between providers.
 
+Instead of showing data from only one API, the application compares data from two sources side by side. This makes it easier to see differences between forecast providers and understand that weather predictions are not always fully accurate.
+
+---
+
+## Features
+
+### API Comparison
+
+The application compares weather data from:
+
+* WeatherAPI
+* Open-Meteo
+
+This allows users to see differences between two forecast sources.
+
+### Location-Based Weather
+
+The application uses the user’s IP address to detect their approximate location and display weather data for that area.
+
+### API Call Optimization
+
+WeatherAPI has a limited number of monthly API calls. To reduce unnecessary requests, the application stores weather data per user IP address using Redis.
+
+### Current Day Forecast
+
+Users can view hourly weather data for the current day.
+
+### Weekly Forecast
+
+Users can switch from the daily view to a weekly forecast view.
+
+### Interactive Graphs
+
+The application visualizes weather data using graphs, making it easier to compare temperature, rain chance, and forecast changes.
+
+---
+
+## Tech Stack
+
+* Python
+* Flask
+* Redis
+* WeatherAPI
+* Open-Meteo API
+* IP Geolocation API
+* HTML / CSS / JavaScript
+
+---
 
 ## Installation
 
-To install the application and utilize it alongside existing applications, you need to create accounts on a few websites (no payment required!). Save the API keys for each service in the local environment.<br>
-here are the website you will need to register:
-- weatherapi.com : this is one of the API's the application is using to get the data.
-- open-meteo.com : this is one of the API's the application is using to get the data.
-- ipgeolocation.com : this is needed to get the geolocation of the user's ip address to show the weather information by the location.
-- redis.com : this is the database of the application that is connected with redis library in python.
-
-#### now lets start with the configuration
-create virtual environment and then inside the virtual envirnment install the libraries with this command:
+### 1. Clone the Repository
 
 ```bash
-# Example installation command
-pip install -r requirments.txt
+git clone <repository-url>
+cd <repository-name>
 ```
 
-in the weather.py change the app.debug mode to True for running it in debug mode
+### 2. Create a Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+Activate the virtual environment.
+
+On Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+On macOS / Linux:
+
+```bash
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+> Note: Make sure the file is named `requirements.txt`. If your project currently uses `requirments.txt`, rename it to `requirements.txt`.
+
+---
+
+## Environment Variables
+
+Create a `.env` file inside:
+
+```txt
+main/env/.env
+```
+
+Example `.env` file:
+
+```env
+REDIS_HOST_URI="your redis host"
+REDIS_PORT=6379
+REDIS_USERNAME="your redis username"
+REDIS_PASSWORD="your redis password"
+
+SECRET_FLASK_KEY="your secret flask key"
+
+# WeatherAPI
+WEATHERAPI_API_URI="http://api.weatherapi.com/v1"
+WEATHERAPI_API_KEY="your weatherapi key"
+WEATHERAPI_NAME="weatherapi.com"
+
+# Open-Meteo
+OPENMETEO_URI="https://api.open-meteo.com/v1/forecast"
+OPENMETEO_KEY="no key"
+OPENMETEO_SOURCE="openmeteo_api"
+
+# IP Geolocation
+GEO_API_KEY="your ip geolocation api key"
+```
+
+---
+
+## Required External Services
+
+You need accounts or API keys for the following services:
+
+### WeatherAPI
+
+Used as one of the weather data providers.
+
+Website:
+
+```txt
+https://www.weatherapi.com/
+```
+
+### Open-Meteo
+
+Used as the second weather data provider.
+
+Website:
+
+```txt
+https://open-meteo.com/
+```
+
+Open-Meteo does not require an API key for basic usage.
+
+### IP Geolocation
+
+Used to detect the user’s approximate location based on their IP address.
+
+Website:
+
+```txt
+https://ipgeolocation.io/
+```
+
+### Redis
+
+Used for caching weather data and reducing repeated API calls.
+
+You can use a local Redis server or a hosted Redis service such as Redis Cloud.
+
+---
+
+## Running the Application
+
+In `weather.py`, make sure the Flask app is configured correctly.
+
+For development, you can enable debug mode:
+
 ```python
 if __name__ == "__main__":
-    app.secret_key = os.getenv('SECRET_FLASK_KEY')
-    app.debug = False
+    app.secret_key = os.getenv("SECRET_FLASK_KEY")
+    app.debug = True
     app.run()
 ```
 
-go to main/env/ and create there .env file with the contents:
+Run the application:
 
-```.env
-REDIS_HOST_URI = "your redis host"
-REDIS_PORT = "redis port"(int)
-REDIS_USERNAME = 'redis username'
-REDIS_PASSWORD = 'redis password'
-SECRET_FLASK_KEY = "secret flask key of the application"
-
-#1000 calls per month
-WEATHERAPI_API_URI = "http://api.weatherapi.com/v1" #this is the starter base uri
-WEATHERAPI_API_KEY = "weatherapi key"
-WEATHERAPI_NAME = "weatherapi.com"
-
-#NO LIMIT
-OPENMETEO_URI = "https://api.open-meteo.com/v1/forecast"
-OPENMETEO_KEY = "no key"
-
-OPENMETEO_SOURCE = "openmateo_api"
-GEO_API_KEY = "geo_api_key"
+```bash
+python weather.py
 ```
-now we almost ready.
-to be continued
 
+The application should start locally.
 
-## Features
-### 1.API Limited Calles.
+Example:
 
-- Weatherapi API is limited to 1000 calls per month per user so each ip address that access the website is stored with the data that it got.
+```txt
+http://127.0.0.1:5000
+```
 
-### 2. Location-Based Forecast
+---
 
-- The weather is presented by the location of the user's IP address.
+## Usage
 
-### 3. Interactive Graphs
+### For Users
 
-- Visualize weather patterns and explore different regions using an interactive Graphs that displays current conditions and forecasts.
+Users can open the application and view weather data for their location.
 
-### 4. Application Purpose
+The application displays weather information from two APIs, allowing users to compare the results and see how forecasts can differ between providers.
 
-- The main purpose is basicly to show you that there are always a differences in a forecast even if they updating the data its still not so accurate and not the same. 
+### For Developers
 
+The code is structured to make it easier to refactor or add new weather APIs.
+
+To integrate another weather API:
+
+1. Create a new API interface class.
+2. Add the new API logic inside the API folder.
+3. Connect the new API class to the API adapter.
+4. Register it inside the API facade.
+5. Display the new API data in the UI.
+
+---
 
 ## Screenshots
 
-### 1. Home Screen
+### Home Screen
 
 ![Home Screen](screenshots/first_page2.PNG)
 
-*Description: Overview of the main screen with description of the purpose and the application.*
+The home page explains the purpose of the application and introduces the weather comparison concept.
 
+### Weather Page — Current Day View
 
-### 2. Weather Page (Default Day View)
+![Weather Page](screenshots/weather_page.PNG)
 
-![weather page](screenshots/weather_page.PNG)
+Displays hourly weather data for the current day.
 
-*Description: Visual representation of the current day weather by the hours, this is the basic representation.*
+### Display Navigation
 
+![Display Bar](screenshots/navbar.PNG)
 
-### 3. Display
+Allows users to switch between different weather views.
 
-![display bar](screenshots/navbar.PNG)
+### Weather Page — Week View
 
-*Description: You can change it to see weather information for the whole week starting from the current day.*
+![Week View](screenshots/weather_page.PNG)
 
+Displays weather data grouped by days, starting from the current day.
 
-### 4. Weather Page (Week View)
-
-![week view](screenshots/weather_page.PNG)
-
-*Description: Visual representation of the weather sorted by days, starting from the current day.*
-
+---
 
 ## Architecture
 
-Now, let's explore the interesting part of the application.
+The application uses a layered structure with several design patterns to keep the code readable and easier to maintain.
 
-### Application Design Diagram
+### MVC Pattern
 
-![application diagram](screenshots/top_layer_diagram.PNG)
+![MVC Diagram](screenshots/mvc.PNG)
 
-The top layer of the application is designed using the Model-View-Controller (MVC) pattern. Internally, additional design patterns are employed for code readability and simplicity.
+The top layer of the application follows the MVC pattern.
 
-**MVC (Model-View-Controller) Design Pattern Diagram**
+* **Model**: Handles data and API responses.
+* **View**: Displays weather data to the user.
+* **Controller**: Handles requests and controls the flow between the view and the application logic.
 
-![application diagram](screenshots/mvc.PNG)
+### Adapter Pattern
 
-   - Serves as the core of the application, handling requests from the UI.
-   - Retrieves weather data from external APIs or data sources.
+![API Adapter Diagram](screenshots/api_diagram.PNG)
 
-**Adapter Design Pattern Diagram**
+The adapter pattern is used to normalize data from different weather APIs.
 
-![application diagram](screenshots/api_diagram.PNG)
+Each API may return different response structures. The adapter converts those different structures into a common format that the rest of the application can use.
 
-   - Serves as the core of the application, handling requests from the UI.
-   - Retrieves weather data from external APIs or data sources.
+### Facade Pattern
 
-**Facade Design Pattern Diagram**
+![Facade Diagram](screenshots/interactive_map.png)
 
-![application diagram](screenshots/interactive_map.png)
+The facade pattern provides a simpler interface for working with multiple APIs.
 
-   - Serves as the core of the application, handling requests from the UI.
-   - Retrieves weather data from external APIs or data sources.
+Instead of the rest of the application calling every API directly, the facade manages the API calls and returns the required weather data in a cleaner way.
+
+### Top Layer Diagram
+
+![Application Diagram](screenshots/top_layer_diagram.PNG)
+
+The top layer diagram shows the general flow of the application and how the main components communicate with each other.
 
 ### Component Diagram
 
 ![Component Diagram](architecture/component_diagram.png)
 
-*Description: The component diagram illustrates the relationships between different components of the Weather Application.*
+The component diagram shows the relationships between the main parts of the application.
 
 In the diagram:
 
-- The arrows represent the flow of data or requests between components.
-- Each component is labeled with its specific responsibility.
-- 
+* Arrows represent the flow of data or requests.
+* Each component has a specific responsibility.
+* External APIs provide weather and location data.
+* Redis stores cached weather results to reduce repeated API calls.
 
+---
+
+## Project Structure
+
+```txt
+.
+├── weather.py
+├── main
+│   └── env
+│       └── .env
+├── screenshots
+│   ├── clouds.jpg
+│   ├── first_page2.PNG
+│   ├── weather_page.PNG
+│   ├── navbar.PNG
+│   ├── top_layer_diagram.PNG
+│   ├── mvc.PNG
+│   ├── api_diagram.PNG
+│   └── interactive_map.png
+├── architecture
+│   └── component_diagram.png
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Security Notes
+
+Do not commit your `.env` file to GitHub.
+
+Add it to `.gitignore`:
+
+```txt
+.env
+main/env/.env
+```
+
+API keys, Redis credentials, and Flask secret keys should always stay private.
+
+---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
+See the [LICENSE](LICENSE) file for details.
